@@ -1,0 +1,197 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+@import "tailwindcss";
+
+@theme {
+  --color-background: hsl(0 0% 4.7%);
+  --color-foreground: hsl(0 0% 96.5%);
+  --color-card: hsl(0 0% 4.7%);
+  --color-card-foreground: hsl(0 0% 96.5%);
+  --color-popover: hsl(0 0% 4.7%);
+  --color-popover-foreground: hsl(0 0% 96.5%);
+  --color-primary: hsl(220 100% 59%);
+  --color-primary-foreground: hsl(0 0% 100%);
+  --color-secondary: hsl(0 0% 12%);
+  --color-secondary-foreground: hsl(0 0% 96.5%);
+  --color-muted: hsl(0 0% 12%);
+  --color-muted-foreground: hsl(0 0% 72.5%);
+  --color-accent: hsl(220 100% 59%);
+  --color-accent-foreground: hsl(0 0% 100%);
+  --color-destructive: hsl(0 84.2% 60.2%);
+  --color-destructive-foreground: hsl(0 0% 98%);
+  --color-border: hsl(0 0% 18%);
+  --color-input: hsl(0 0% 18%);
+  --color-ring: hsl(220 100% 59%);
+  --radius: 0.375rem;
+  
+  /* Venture brand colors */
+  --color-venture-black: #283252;
+  --color-venture-white: #FFFFFF;
+  --color-venture-gray: #9A9A9A;
+  --color-venture-blue: #0088CC;
+  --color-venture-charcoal: #374369;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  html {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: clip;
+    scroll-behavior: auto;
+  }
+  
+  body {
+    width: 100%;
+    max-width: 100%;
+    @apply bg-venture-black text-venture-white antialiased;
+    font-family: 'Inter', sans-serif;
+    overflow-x: clip;
+  }
+
+  #root {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: clip;
+  }
+}
+
+
+@supports not (overflow: clip) {
+  html,
+  body,
+  #root {
+    overflow-x: hidden;
+  }
+}
+/* Typography */
+.font-display {
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+.font-mono {
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+/* Headline styles */
+.headline-xl {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 0.92;
+  text-transform: uppercase;
+}
+
+.headline-lg {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 0.95;
+  text-transform: uppercase;
+}
+
+/* Micro label */
+.micro-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 500;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* Accent color */
+.text-accent {
+  color: var(--color-venture-blue);
+}
+
+.bg-accent {
+  background-color: var(--color-venture-blue);
+}
+
+/* Hairline */
+.hairline {
+  background-color: rgba(255, 255, 255, 0.18);
+}
+
+.hairline-dark {
+  background-color: var(--color-venture-charcoal);
+}
+
+/* Noise overlay */
+.noise-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.04;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+}
+
+/* Section base */
+.section-pinned {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Button styles */
+.btn-primary {
+  @apply px-8 py-4 bg-accent text-white font-medium rounded-md transition-all duration-300;
+}
+
+.btn-primary:hover {
+  @apply brightness-110 transform scale-[1.02];
+}
+
+/* Card border */
+.card-border {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+/* Accent bar */
+.accent-bar {
+  height: 4px;
+  background-color: #0088CC;
+  opacity: 0.18;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #283252;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Selection */
+::selection {
+  background-color: rgba(0, 136, 204, 0.3);
+  color: #FFFFFF;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

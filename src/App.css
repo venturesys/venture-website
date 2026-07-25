@@ -1,0 +1,127 @@
+/* App-specific styles */
+
+/* Ensure smooth scrolling for GSAP */
+html {
+  scroll-behavior: auto !important;
+}
+
+/* Pin spacer styling */
+.pin-spacer {
+  background-color: transparent !important;
+}
+
+/* Section transitions */
+section {
+  will-change: transform, opacity;
+}
+
+/* Image hover effects */
+img {
+  transition: filter 0.3s ease;
+}
+
+/* Card hover lift */
+.card-border {
+  transition: border-color 0.3s ease, transform 0.3s ease;
+}
+
+.card-border:hover {
+  border-color: rgba(47, 107, 255, 0.3);
+}
+
+/* Button ripple effect */
+.btn-primary {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.3s ease, height 0.3s ease;
+}
+
+.btn-primary:active::after {
+  width: 200%;
+  height: 200%;
+}
+
+/* Form input focus states */
+input:focus,
+textarea:focus {
+  box-shadow: 0 0 0 3px rgba(47, 107, 255, 0.1);
+}
+
+/* Link underline animation */
+a {
+  position: relative;
+}
+
+a.animated-link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background-color: currentColor;
+  transition: width 0.3s ease;
+}
+
+a.animated-link:hover::after {
+  width: 100%;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .section-pinned {
+    min-height: 100vh;
+    height: auto;
+  }
+  
+  .headline-xl,
+  .headline-lg {
+    letter-spacing: -0.02em;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  .section-pinned {
+    height: auto;
+    min-height: 100vh;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .card-border {
+    border-width: 2px;
+    border-color: rgba(246, 246, 246, 0.5);
+  }
+  
+  .hairline {
+    opacity: 0.5;
+  }
+}
+
+/* Internal content pages */
+.content-grid > * {
+  min-width: 0;
+}
