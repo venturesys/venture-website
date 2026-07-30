@@ -102,7 +102,7 @@ export default function AdminLoginPage() {
         />
 
         <label className="block text-sm font-medium mb-1.5" htmlFor="admin-token">
-          Token de acesso
+          Senha de acesso
         </label>
         <input
           id="admin-token"
@@ -114,11 +114,6 @@ export default function AdminLoginPage() {
           placeholder="github_pat_…"
           className="w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-slate-900"
         />
-        <p className="mt-2 text-xs text-slate-500">
-          Token do GitHub com permissão de escrita em <strong>Contents</strong> neste
-          repositório. Fica só nesta aba — fechou o navegador, precisa entrar de novo.
-        </p>
-
         {error ? (
           <p role="alert" className="mt-5 rounded-md bg-red-50 px-3 py-2.5 text-sm text-red-700">
             {error}
