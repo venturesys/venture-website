@@ -29,15 +29,21 @@ const CARD_TEXT_HEIGHT = 95;
  * O card é dimensionado pela largura da coluna (thumbnail 16/9), por isso a conta
  * depende das duas dimensões da janela.
  */
+/** A seção só é renderizada no desktop, e ali a grade é sempre de três colunas. */
+const COLUNAS = 3;
+
 function fitCards(viewportWidth: number, viewportHeight: number): number {
-  const colunas = viewportWidth >= 1024 ? 3 : viewportWidth >= 768 ? 2 : 1;
-  const larguraColuna = (viewportWidth * 0.88 - GRID_GAP * (colunas - 1)) / colunas;
+  const larguraColuna = (viewportWidth * 0.88 - GRID_GAP * (COLUNAS - 1)) / COLUNAS;
   const alturaCard = (larguraColuna * 9) / 16 + CARD_TEXT_HEIGHT;
 
   // Espaço útil depois que o título sai de cena: da navegação até a folga inferior.
   const disponivel = viewportHeight - NAV_CLEARANCE - viewportHeight * 0.06;
 
-  return disponivel >= alturaCard * 2 + GRID_GAP ? MAX_CARDS : MAX_CARDS / 2;
+  // Conta LINHAS, não cards — contar cards direto quebrava quando a grade não tinha
+  // exatamente três colunas.
+  const linhas = Math.max(1, Math.floor((disponivel + GRID_GAP) / (alturaCard + GRID_GAP)));
+
+  return Math.min(MAX_CARDS, linhas * COLUNAS);
 }
 
 export default function InsightsSection() {
@@ -183,7 +189,7 @@ export default function InsightsSection() {
       </div>
 
       {/* Grid */}
-      <div ref={gridRef} className="px-[6vw] grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+      <div ref={gridRef} className="px-[6vw] grid grid-cols-3 gap-6 md:gap-8">
         {items.map((item, index) => (
           <Link
             key={item.id}
