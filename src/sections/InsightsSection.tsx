@@ -238,7 +238,9 @@ export default function InsightsSection() {
                   </span>
                 </div>
 
-                <h3 className="text-venture-white font-display font-semibold text-lg leading-snug group-hover:text-accent transition-colors duration-300">
+                {/* Duas linhas no máximo: a altura do card entra no cálculo de quantas
+                    linhas cabem, e um título de três linhas estouraria a conta. */}
+                <h3 className="line-clamp-2 text-venture-white font-display font-semibold text-lg leading-snug group-hover:text-accent transition-colors duration-300">
                   {item.title}
                 </h3>
 
