@@ -1,4 +1,4 @@
-import { useRef, useLayoutEffect, useEffect } from 'react';
+import { useRef, useLayoutEffect, useEffect, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Clock, ArrowRight } from 'lucide-react';
@@ -9,7 +9,36 @@ import { PIN_PRIORITY, scheduleScrollRefresh } from '@/lib/scroll-pins';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const SKELETON_COUNT = 6;
+const MAX_CARDS = 6;
+
+/** Altura da navegação fixa; nada da grade pode terminar acima disso. */
+const NAV_CLEARANCE = 96;
+
+const GRID_GAP = 32;
+
+/** Altura do card abaixo do thumbnail: categoria, tempo de leitura e título. */
+const CARD_TEXT_HEIGHT = 95;
+
+/**
+ * Quantos cards cabem de fato na janela.
+ *
+ * A seção é fixada e tem `overflow: hidden`, então o que não couber some — e some por
+ * cima, atrás do menu. Duas linhas só cabem em telas altas; abaixo disso a seção mostra
+ * uma linha, e quem quiser o resto tem o "Ver todos os insights".
+ *
+ * O card é dimensionado pela largura da coluna (thumbnail 16/9), por isso a conta
+ * depende das duas dimensões da janela.
+ */
+function fitCards(viewportWidth: number, viewportHeight: number): number {
+  const colunas = viewportWidth >= 1024 ? 3 : viewportWidth >= 768 ? 2 : 1;
+  const larguraColuna = (viewportWidth * 0.88 - GRID_GAP * (colunas - 1)) / colunas;
+  const alturaCard = (larguraColuna * 9) / 16 + CARD_TEXT_HEIGHT;
+
+  // Espaço útil depois que o título sai de cena: da navegação até a folga inferior.
+  const disponivel = viewportHeight - NAV_CLEARANCE - viewportHeight * 0.06;
+
+  return disponivel >= alturaCard * 2 + GRID_GAP ? MAX_CARDS : MAX_CARDS / 2;
+}
 
 export default function InsightsSection() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -17,7 +46,19 @@ export default function InsightsSection() {
   const cardsRef = useRef<(HTMLAnchorElement | null)[]>([]);
   const gridRef = useRef<HTMLDivElement>(null);
 
-  const { insights, loading } = useInsights(SKELETON_COUNT);
+  const [cardCount, setCardCount] = useState(() =>
+    typeof window === 'undefined' ? MAX_CARDS : fitCards(window.innerWidth, window.innerHeight)
+  );
+
+  const { insights, loading } = useInsights(cardCount);
+
+  // Redimensionar muda quantos cards cabem; sem isso a grade volta a ser cortada.
+  useEffect(() => {
+    const onResize = () => setCardCount(fitCards(window.innerWidth, window.innerHeight));
+
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
 
   // A seção fica fixa enquanto a grade avança da primeira para a segunda linha.
   // O cálculo usa a altura real dos cards, inclusive após os dados do WordPress chegarem.
@@ -31,16 +72,19 @@ export default function InsightsSection() {
         (card): card is HTMLAnchorElement => Boolean(card)
       );
 
-      // Distância que a grade precisa subir para a última linha entrar por completo,
-      // com uma folga de 8% da altura da seção sobrando embaixo.
-      const getGridTravel = () =>
-        Math.max(
-          0,
-          grid.offsetTop +
-            grid.scrollHeight -
-            section.clientHeight +
-            section.clientHeight * 0.08
-        );
+      // Quanto a grade sobe quando o título sai de cena.
+      //
+      // O teto é o que importa: subir mais do que `grid.offsetTop - NAV_CLEARANCE`
+      // empurra a primeira linha para trás do menu fixo, que é opaco. Antes o cálculo
+      // só olhava para a última linha e, em janelas mais baixas, comia meio card de
+      // cima. Se nem assim a grade couber, `fitCards` já reduziu o número de cards.
+      const getGridTravel = () => {
+        const necessario =
+          grid.offsetTop + grid.scrollHeight - section.clientHeight + section.clientHeight * 0.06;
+        const maximo = Math.max(0, grid.offsetTop - NAV_CLEARANCE);
+
+        return Math.max(0, Math.min(necessario, maximo));
+      };
 
       const scrollTl = gsap.timeline({
         scrollTrigger: {
@@ -109,7 +153,7 @@ export default function InsightsSection() {
 
   // Items to render: real data or skeleton placeholders
   const items = loading
-    ? Array.from({ length: SKELETON_COUNT }, (_, i) => ({ id: i, skeleton: true as const }))
+    ? Array.from({ length: cardCount }, (_, i) => ({ id: i, skeleton: true as const }))
     : insights.map((insight) => ({ ...insight, skeleton: false as const }));
 
   return (
@@ -145,7 +189,7 @@ export default function InsightsSection() {
             key={item.id}
             ref={(el) => { cardsRef.current[index] = el; }}
             to={item.skeleton ? '#' : item.link}
-            className="group cursor-pointer block"
+            className="group relative cursor-pointer block"
             onClick={(event) => {
               if (item.skeleton) {
                 event.preventDefault();
@@ -155,7 +199,7 @@ export default function InsightsSection() {
             {item.skeleton ? (
               <>
                 {/* Skeleton Thumbnail */}
-                <div className="relative overflow-hidden mb-4 aspect-[16/10] bg-venture-charcoal/30 animate-pulse rounded" />
+                <div className="relative overflow-hidden mb-4 aspect-[16/9] bg-venture-charcoal/30 animate-pulse rounded" />
                 {/* Skeleton Meta */}
                 <div className="flex items-center gap-3 mb-2">
                   <div className="h-3 w-16 bg-venture-charcoal/30 animate-pulse rounded" />
@@ -168,7 +212,7 @@ export default function InsightsSection() {
             ) : (
               <>
                 {/* Thumbnail */}
-                <div className="relative overflow-hidden mb-4 aspect-[16/10]">
+                <div className="relative overflow-hidden mb-4 aspect-[16/9]">
                   <img
                     src={item.image}
                     alt={item.title}
@@ -192,7 +236,9 @@ export default function InsightsSection() {
                   {item.title}
                 </h3>
 
-                <div className="mt-3 flex items-center gap-2 text-venture-gray text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                {/* Sobreposto ao thumbnail: reservar espaço no fluxo custava 32px por
+                    card que só apareciam no hover — e era espaço que faltava embaixo. */}
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-center gap-2 bg-gradient-to-t from-venture-black via-venture-black/80 to-transparent px-3 pb-2 pt-8 text-sm text-venture-white opacity-0 transition-opacity duration-300 group-hover:opacity-100">
                   <span>Ler artigo</span>
                   <ArrowRight className="w-4 h-4" />
                 </div>
